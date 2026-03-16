@@ -42,18 +42,28 @@ def predict(text):
 
     probs = model.predict_proba(vec)[0]
 
-    real_prob = float(probs[0])
+    true_prob = float(probs[0])
     fake_prob = float(probs[1])
 
-    if fake_prob > real_prob:
-        label = "fake"
+    label = "fake" if fake_prob > true_prob else "true"
+
+    confidence_score = max(fake_prob, true_prob)
+    if confidence_score > 0.8:
+        confidence = "high"
+    elif confidence_score > 0.6:
+        confidence = "medium"
     else:
-        label = "real"
+        confidence = "low"
 
     return {
+        # Canonical response shape used by FastAPI endpoint.
+        "label": label,
+        "fake_probability": round(fake_prob, 4),
+        "true_probability": round(true_prob, 4),
+        "confidence": confidence,
+        # Backward-compatible aliases used by older scripts.
         "prediction": label,
-        "fake_probability": fake_prob,
-        "real_probability": real_prob
+        "real_probability": round(true_prob, 4)
     }
 
 if __name__ == "__main__":

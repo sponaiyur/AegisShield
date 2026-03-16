@@ -1,4 +1,4 @@
-from graph.engine import (
+from backend.graph.engine import (
     G,
     SCORES,
     SUPERSPREADER_ID,

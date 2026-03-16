@@ -5,6 +5,7 @@ pydantic
 
 pandas
 numpy
+networkx
 scikit-learn
 joblib
 nltk
