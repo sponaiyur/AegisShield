@@ -19,7 +19,7 @@ export function AuditLogPanel() {
       {isLoading && (
         <div className="flex items-center justify-center gap-2 py-8">
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          <span className="font-mono text-xs text-muted-foreground">Loading audit trail...</span>
+          <span className="font-mono text-xs text-muted-foreground">Syncing containment records...</span>
         </div>
       )}
 
@@ -74,7 +74,7 @@ export function AuditLogPanel() {
         {data?.log.length === 0 && (
           <div className="py-8 text-center">
             <ScrollText className="mx-auto mb-2 h-6 w-6 text-muted-foreground/30" />
-            <p className="font-mono text-xs text-muted-foreground">No audit entries yet</p>
+            <p className="font-mono text-xs text-muted-foreground">No containment operations on record</p>
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { useThreatScores, useContain } from '@/hooks/useApi'
-import { Zap, Shield } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { SkeletonTable } from '@/components/Skeleton'
+import { LogoMark } from '@/components/LogoMark'
 
 export function SuperSpreaderTable() {
   const { data, isLoading } = useThreatScores()
@@ -65,7 +66,7 @@ export function SuperSpreaderTable() {
                     disabled={contain.isPending}
                     className="flex items-center gap-1 rounded-md bg-threat/15 px-2 py-1 text-[10px] text-threat transition-colors hover:bg-threat/30 active:scale-[0.97]"
                   >
-                    <Shield className="h-2.5 w-2.5" /> Contain
+                    <LogoMark className="h-2.5 w-2.5" /> Contain
                   </button>
                 )}
               </td>

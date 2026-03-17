@@ -1,13 +1,16 @@
-import { BarChart3, Network, Shield } from 'lucide-react'
+import { BarChart3, Network } from 'lucide-react'
 import { TopSpreadersChart } from '@/components/charts/TopSpreadersChart'
 import { ClusterDonutChart } from '@/components/charts/ClusterDonutChart'
 import { ContainmentChart } from '@/components/charts/ContainmentChart'
 import { PropagationGraph } from '@/components/graph/PropagationGraph'
 import { RevealOnScroll } from '@/components/RevealOnScroll'
+import { LogoMark } from '@/components/LogoMark'
+import { PageBackground } from '@/components/PageBackground'
 
 export function AnalyticsPage() {
   return (
-    <main className="page-content mx-auto max-w-7xl px-6 py-10">
+    <PageBackground image="/analytics.jpg" tone="info">
+      <main className="page-content mx-auto max-w-7xl px-6 py-10">
       <div className="mb-8 animate-slide-up">
         <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-widest text-info">
           Network Intelligence
@@ -35,7 +38,7 @@ export function AnalyticsPage() {
         {[
           { icon: BarChart3, color: 'text-primary', label: 'Top Spreaders',        Chart: TopSpreadersChart },
           { icon: Network,   color: 'text-info',    label: 'Cluster Distribution', Chart: ClusterDonutChart },
-          { icon: Shield,    color: 'text-safe',    label: 'Containment Impact',   Chart: ContainmentChart  },
+          { icon: LogoMark,  color: 'text-safe',    label: 'Containment Impact',   Chart: ContainmentChart  },
         ].map(({ icon: Icon, color, label, Chart }, i) => (
           <RevealOnScroll key={label} delay={80 + i * 80}>
             <div className="card-glass rounded-2xl p-5">
@@ -50,6 +53,7 @@ export function AnalyticsPage() {
           </RevealOnScroll>
         ))}
       </div>
-    </main>
+      </main>
+    </PageBackground>
   )
 }

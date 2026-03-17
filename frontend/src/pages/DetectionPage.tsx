@@ -1,25 +1,28 @@
-import { Shield, Crosshair } from 'lucide-react'
+import { Crosshair } from 'lucide-react'
 import { DetectionPanel } from '@/components/DetectionPanel'
 import { PropagationGraph } from '@/components/graph/PropagationGraph'
 import { RevealOnScroll } from '@/components/RevealOnScroll'
+import { LogoMark } from '@/components/LogoMark'
+import { PageBackground } from '@/components/PageBackground'
 
 export function DetectionPage() {
   return (
-    <main className="page-content mx-auto max-w-7xl px-6 py-10">
+    <PageBackground image="/analytics.jpg" tone="primary">
+      <main className="page-content mx-auto max-w-7xl px-6 py-10">
       <div className="mb-8 animate-slide-up">
         <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-widest text-primary">
           Content Analysis
         </p>
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20">
-            <Shield className="h-5 w-5 text-primary" />
+            <LogoMark className="h-5 w-5" />
           </div>
           <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
-            Content Detection
+            Content Analysis
           </h1>
         </div>
         <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-          Classify text or images to detect misinformation. Run full analysis to generate propagation graphs.
+          Classify text or images to trace the source and spread of misinformation. Run full analysis to generate propagation graphs.
         </p>
       </div>
 
@@ -42,6 +45,7 @@ export function DetectionPage() {
           </div>
         </RevealOnScroll>
       </div>
-    </main>
+      </main>
+    </PageBackground>
   )
 }

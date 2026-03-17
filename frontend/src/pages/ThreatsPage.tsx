@@ -1,27 +1,32 @@
-import { BarChart3, ShieldAlert } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 import { SuperSpreaderTable } from '@/components/SuperSpreaderTable'
 import { ContainmentPanel } from '@/components/ContainmentPanel'
 import { AlertsPanel } from '@/components/AlertsPanel'
 import { RevealOnScroll } from '@/components/RevealOnScroll'
+import { PageBackground } from '@/components/PageBackground'
+import { LogoMark } from '@/components/LogoMark'
 
 export function ThreatsPage() {
   return (
-    <main className="page-content mx-auto max-w-7xl px-6 py-10">
-      <div className="mb-8 animate-slide-up">
-        <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-widest text-threat">
-          Threat Operations
-        </p>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-threat/10 ring-1 ring-threat/20">
-            <ShieldAlert className="h-5 w-5 text-threat" />
+    <PageBackground image="/threat.jpg" tone="threat">
+      <main className="page-content mx-auto max-w-7xl px-6 py-10">
+      <div className="relative mb-8 overflow-hidden rounded-3xl border border-border/80 bg-card/35 animate-slide-up backdrop-blur-[2px]">
+        <div className="relative px-6 py-7 md:px-8 md:py-8">
+          <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-widest text-threat">
+            Threat Operations
+          </p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-threat/10 ring-1 ring-threat/20 backdrop-blur-sm">
+              <LogoMark className="h-5 w-5" />
+            </div>
+            <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
+              Threat Intelligence
+            </h1>
           </div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
-            Threat Intelligence
-          </h1>
+          <p className="mt-2 max-w-lg text-sm text-muted-foreground">
+            Real-time threat scoring, super-spreader rankings, and containment controls.
+          </p>
         </div>
-        <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-          Real-time threat scoring, super-spreader rankings, and containment controls.
-        </p>
       </div>
 
       <RevealOnScroll delay={60}>
@@ -44,6 +49,7 @@ export function ThreatsPage() {
           <AlertsPanel />
         </RevealOnScroll>
       </div>
-    </main>
+      </main>
+    </PageBackground>
   )
 }
