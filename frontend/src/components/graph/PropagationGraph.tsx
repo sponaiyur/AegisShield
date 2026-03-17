@@ -4,6 +4,7 @@ import Cytoscape from 'cytoscape'
 import COSEBilkent from 'cytoscape-cose-bilkent'
 import { useGraph, useContain } from '@/hooks/useApi'
 import { Loader2, Crosshair, Info } from 'lucide-react'
+import { Skeleton } from '@/components/Skeleton'
 import type { GraphNode } from '@/types'
 
 Cytoscape.use(COSEBilkent)
@@ -124,10 +125,15 @@ export function PropagationGraph() {
       </div>
 
       {/* Graph Canvas */}
-      <div className="relative flex-1">
+      <div className="relative flex-1 overflow-hidden">
         {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-background/60 p-6">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <div className="w-full max-w-xs space-y-2">
+              {[80, 60, 72, 50, 65].map((w, i) => (
+                <Skeleton key={i} className={`h-2 w-[${w}%]`} style={{ animationDelay: `${i * 100}ms` } as React.CSSProperties} />
+              ))}
+            </div>
           </div>
         )}
         {error && (
@@ -135,7 +141,15 @@ export function PropagationGraph() {
             <p className="font-mono text-xs text-threat">Failed to load graph data</p>
           </div>
         )}
-        <div ref={containerRef} className="h-full w-full" style={{ background: 'hsl(220 22% 5%)' }} />
+
+        {/* Scan line overlay */}
+        {!isLoading && data && (
+          <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-b-none">
+            <div className="graph-scan-line" />
+          </div>
+        )}
+
+        <div ref={containerRef} className="h-full w-full" style={{ background: 'hsl(222 22% 5%)' }} />
       </div>
 
       {/* Legend */}
@@ -155,7 +169,7 @@ export function PropagationGraph() {
 
       {/* Node Info Popup */}
       {selectedNode && (
-        <div className="absolute bottom-14 right-4 z-20 w-56 rounded-lg border border-border bg-card p-3 shadow-xl">
+        <div className="absolute bottom-14 right-4 z-20 w-56 rounded-xl border border-border bg-card p-3 shadow-2xl animate-slide-up">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Info className="h-3 w-3 text-primary" />
@@ -171,7 +185,7 @@ export function PropagationGraph() {
             <button
               onClick={() => handleContain(selectedNode.id)}
               disabled={contain.isPending}
-              className="mt-2 w-full rounded bg-threat py-1.5 font-mono text-[10px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+              className="mt-2.5 w-full rounded-lg bg-threat py-1.5 font-mono text-[10px] font-semibold text-white shadow-md shadow-threat/20 transition-all hover:opacity-90 disabled:opacity-40"
             >
               {contain.isPending ? 'Containing...' : 'Contain Node'}
             </button>
