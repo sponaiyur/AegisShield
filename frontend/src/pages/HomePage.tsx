@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useCallback, type ReactNode, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Shield, Search, Network, BarChart3, AlertTriangle, ScrollText,
@@ -11,9 +11,9 @@ import { RevealOnScroll } from '@/components/RevealOnScroll'
 
 const features = [
   {
-    icon: Search, num: '01', title: 'Content Detection', link: '/detection',
+    icon: Search, num: '01', title: 'Content Analysis', link: '/detection',
     color: 'text-primary', bg: 'bg-primary/10', ring: 'ring-primary/20',
-    description: 'AI-powered classification of misinformation using NLP models and OCR pipelines — real-time confidence scoring on any media.',
+    description: 'AI-powered classification of misinformation sources using NLP models and OCR pipelines — real-time confidence scoring on any media.',
   },
   {
     icon: Network, num: '02', title: 'Propagation Analysis', link: '/analytics',
@@ -33,10 +33,10 @@ const features = [
 ]
 
 const rawStats = [
-  { label: 'Detection Accuracy', raw: '97.3%', icon: Zap,   delta: '+2.1%' },
-  { label: 'Nodes Monitored',    raw: '50+',   icon: Globe,  delta: 'Active' },
-  { label: 'Threat Models',      raw: '3',     icon: Shield, delta: 'Deployed' },
-  { label: 'Compliance',         raw: '100%',  icon: Lock,   delta: 'Certified' },
+  { label: 'Source Accuracy',  raw: '97.3%', icon: Zap,   delta: '+2.1%' },
+  { label: 'Nodes Monitored',  raw: '50+',   icon: Globe,  delta: 'Active' },
+  { label: 'Threat Models',    raw: '3',     icon: Shield, delta: 'Deployed' },
+  { label: 'Compliance',       raw: '100%',  icon: Lock,   delta: 'Certified' },
 ]
 
 const steps = [
@@ -69,8 +69,41 @@ function StatNumber({ raw, active }: { raw: string; active: boolean }) {
   )
 }
 
+/* ── 3D tilt card ─────────────────────────────────────────────── */
+function TiltCard({ children, className }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [style, setStyle] = useState<React.CSSProperties>({})
+
+  const handleMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const card = ref.current
+    if (!card) return
+    const rect = card.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width  - 0.5   // -0.5 → 0.5
+    const y = (e.clientY - rect.top)  / rect.height - 0.5
+    setStyle({
+      transform: `perspective(900px) rotateY(${x * 8}deg) rotateX(${-y * 6}deg) scale3d(1.015,1.015,1.015)`,
+    })
+  }, [])
+
+  const handleLeave = useCallback(() => {
+    setStyle({ transform: 'perspective(900px) rotateY(0deg) rotateX(0deg) scale3d(1,1,1)' })
+  }, [])
+
+  return (
+    <div
+      ref={ref}
+      className={`tilt-card ${className ?? ''}`}
+      style={style}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+    >
+      {children}
+    </div>
+  )
+}
+
 export function HomePage() {
-  const { displayed: typedWord, done: typingDone } = useTypewriter('Misinformation', 52, 650)
+  const { displayed: typedWord, done: typingDone } = useTypewriter('Misinformation', 72, 650)
   const { ref: statsRef, isVisible: statsVisible } = useIntersection()
 
   return (
@@ -78,8 +111,13 @@ export function HomePage() {
 
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
+        {/* Hex grid overlay */}
         <div
-          className="absolute inset-0 opacity-[0.025]"
+          className="absolute inset-0 bg-hex-grid opacity-[0.03]"
+        />
+        {/* Square grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.015]"
           style={{
             backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
                               linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
@@ -88,6 +126,13 @@ export function HomePage() {
         />
         <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 h-[700px] w-[900px] rounded-full bg-primary/6 blur-[140px]" />
         <div className="pointer-events-none absolute -bottom-20 left-1/4 h-[400px] w-[500px] rounded-full bg-info/4 blur-[120px]" />
+        {/* Floating accent orbs */}
+        <div className="pointer-events-none absolute right-[10%] top-[20%] h-2 w-2 rounded-full bg-primary/40"
+          style={{ animation: 'particle-drift 6s ease-in-out infinite' }} />
+        <div className="pointer-events-none absolute left-[15%] top-[40%] h-1.5 w-1.5 rounded-full bg-info/40"
+          style={{ animation: 'particle-drift 8s ease-in-out infinite 1.5s' }} />
+        <div className="pointer-events-none absolute right-[22%] bottom-[20%] h-1 w-1 rounded-full bg-safe/50"
+          style={{ animation: 'particle-drift 7s ease-in-out infinite 3s' }} />
 
         <div className="relative mx-auto max-w-7xl px-6 pb-28 pt-24 md:pb-36 md:pt-32">
           <div className="mx-auto max-w-3xl text-center animate-slide-up">
@@ -103,15 +148,18 @@ export function HomePage() {
               </span>
             </div>
 
-            <h1 className="font-display mb-6 text-5xl font-bold leading-[1.1] tracking-tight text-foreground md:text-7xl">
-              Detect &amp; Contain{' '}
+            {/* Heading — typed word is forced to its own line */}
+            <h1 className="font-display mb-6 text-5xl font-bold leading-[1.15] tracking-tight text-foreground md:text-7xl">
+              Track &amp; Contain
+              <br />
               <span className="text-gradient">
                 {typedWord}
                 {!typingDone && (
                   <span className="ml-0.5 inline-block w-0.5 animate-pulse bg-primary align-bottom">&nbsp;</span>
                 )}
-              </span>{' '}
-              at Scale
+              </span>
+              <br />
+              <span className="text-foreground/80">at Scale</span>
             </h1>
 
             <p className="mx-auto mb-10 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
@@ -141,7 +189,7 @@ export function HomePage() {
 
       {/* ── Stats ─────────────────────────────────────────────────── */}
       <div
-        ref={statsRef as React.RefObject<HTMLDivElement>}
+        ref={statsRef as RefObject<HTMLDivElement>}
         className="border-y border-border bg-card/40"
       >
         <div className="mx-auto grid max-w-7xl grid-cols-2 md:grid-cols-4">
@@ -181,28 +229,30 @@ export function HomePage() {
           <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-widest text-primary">Capabilities</p>
           <h2 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">Platform Overview</h2>
           <p className="mx-auto mt-4 max-w-lg text-sm text-muted-foreground">
-            End-to-end misinformation defense from detection through containment.
+            End-to-end misinformation defense from source tracking through containment.
           </p>
         </RevealOnScroll>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {features.map((f, i) => (
             <RevealOnScroll key={f.title} delay={i * 90}>
-              <Link to={f.link} className="card-glass-hover group relative overflow-hidden rounded-2xl p-7 block">
-                <span className="pointer-events-none absolute right-5 top-4 font-display text-7xl font-bold text-foreground/[0.03] select-none">
-                  {f.num}
-                </span>
-                <div className="relative">
-                  <div className="mb-5 flex items-center gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${f.bg} ring-1 ${f.ring}`}>
-                      <f.icon className={`h-5 w-5 ${f.color}`} />
+              <TiltCard>
+                <Link to={f.link} className="card-glass-hover group relative overflow-hidden rounded-2xl p-7 block">
+                  <span className="pointer-events-none absolute right-5 top-4 font-display text-7xl font-bold text-foreground/[0.03] select-none">
+                    {f.num}
+                  </span>
+                  <div className="relative">
+                    <div className="mb-5 flex items-center gap-3">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${f.bg} ring-1 ${f.ring}`}>
+                        <f.icon className={`h-5 w-5 ${f.color}`} />
+                      </div>
+                      <h3 className="font-display text-base font-semibold text-foreground">{f.title}</h3>
+                      <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground/40 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
                     </div>
-                    <h3 className="font-display text-base font-semibold text-foreground">{f.title}</h3>
-                    <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground/40 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
+                    <p className="text-sm leading-relaxed text-muted-foreground">{f.description}</p>
                   </div>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{f.description}</p>
-                </div>
-              </Link>
+                </Link>
+              </TiltCard>
             </RevealOnScroll>
           ))}
         </div>
@@ -247,11 +297,7 @@ export function HomePage() {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/6 via-transparent to-info/4" />
             <div className="pointer-events-none absolute left-1/2 top-0 h-60 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/12 blur-3xl" />
             <div
-              className="absolute inset-0 opacity-[0.02]"
-              style={{
-                backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,
-                backgroundSize: '40px 40px',
-              }}
+              className="absolute inset-0 bg-hex-grid opacity-[0.025]"
             />
             <div className="relative">
               <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-warning/10 ring-1 ring-warning/30">

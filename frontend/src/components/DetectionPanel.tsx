@@ -70,7 +70,7 @@ export function DetectionPanel() {
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Paste suspicious content for analysis..."
+            placeholder="Paste intercepted content for forensic analysis..."
             rows={5}
             className="w-full resize-none rounded-xl border border-border bg-muted/30 p-3.5 font-mono text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors leading-relaxed"
           />
@@ -102,7 +102,7 @@ export function DetectionPanel() {
           <button
             onClick={handleClassify}
             disabled={loading || !text.trim()}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-mono text-xs font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5 hover:shadow-primary/30 disabled:translate-y-0 disabled:opacity-40 disabled:shadow-none"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-mono text-xs font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5 hover:shadow-primary/30 active:scale-[0.97] disabled:translate-y-0 disabled:opacity-40 disabled:shadow-none"
           >
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
             Classify
@@ -110,7 +110,7 @@ export function DetectionPanel() {
           <button
             onClick={handleAnalyze}
             disabled={loading || !text.trim()}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 font-mono text-xs font-semibold text-accent-foreground shadow-md shadow-accent/20 transition-all hover:-translate-y-0.5 hover:shadow-accent/30 disabled:translate-y-0 disabled:opacity-40 disabled:shadow-none"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 font-mono text-xs font-semibold text-accent-foreground shadow-md shadow-accent/20 transition-all hover:-translate-y-0.5 hover:shadow-accent/30 active:scale-[0.97] disabled:translate-y-0 disabled:opacity-40 disabled:shadow-none"
           >
             {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
             Full Analysis

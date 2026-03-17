@@ -23,7 +23,7 @@ export function Footer() {
               </div>
             </div>
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-              AI-powered misinformation detection and propagation analysis platform.
+              AI-powered misinformation source tracking and propagation analysis platform.
               Protecting information integrity at scale.
             </p>
             <div className="mt-5 flex items-center gap-2">
@@ -42,7 +42,7 @@ export function Footer() {
             </h4>
             <div className="flex flex-col gap-2.5">
               {[
-                { label: 'Detection', path: '/detection' },
+                { label: 'Analysis',  path: '/detection' },
                 { label: 'Analytics', path: '/analytics' },
                 { label: 'Threats',   path: '/threats'   },
                 { label: 'Audit',     path: '/audit'     },

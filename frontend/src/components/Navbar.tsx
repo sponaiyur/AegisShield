@@ -3,8 +3,8 @@ import { NavLink } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
 const navItems = [
-  { label: 'Home',      path: '/' },
-  { label: 'Detection', path: '/detection' },
+  { label: 'Home',     path: '/' },
+  { label: 'Analysis', path: '/detection' },
   { label: 'Analytics', path: '/analytics' },
   { label: 'Threats',   path: '/threats' },
   { label: 'Audit',     path: '/audit' },
@@ -22,7 +22,7 @@ export function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 z-50 bg-background/90 backdrop-blur-xl transition-shadow duration-300 ${
+      className={`sticky top-0 z-50 bg-background/90 backdrop-blur-xl transition-all duration-300 ${
         scrolled ? 'navbar-scrolled' : ''
       }`}
     >

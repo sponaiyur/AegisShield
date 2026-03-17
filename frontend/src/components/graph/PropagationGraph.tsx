@@ -129,6 +129,7 @@ export function PropagationGraph() {
         {isLoading && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-background/60 p-6">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <p className="font-mono text-[11px] text-primary/70">MAPPING NETWORK TOPOLOGY...</p>
             <div className="w-full max-w-xs space-y-2">
               {[80, 60, 72, 50, 65].map((w, i) => (
                 <Skeleton key={i} className={`h-2 w-[${w}%]`} style={{ animationDelay: `${i * 100}ms` } as React.CSSProperties} />
@@ -138,7 +139,7 @@ export function PropagationGraph() {
         )}
         {error && (
           <div className="absolute inset-0 z-10 flex items-center justify-center">
-            <p className="font-mono text-xs text-threat">Failed to load graph data</p>
+            <p className="font-mono text-xs text-threat">NODE GRAPH UNREACHABLE — CHECK CORE CONNECTION</p>
           </div>
         )}
 

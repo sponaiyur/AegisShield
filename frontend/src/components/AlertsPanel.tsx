@@ -40,9 +40,9 @@ export function AlertsPanel() {
   const isFirstMount = useRef(true)
 
   const [alerts, setAlerts] = useState<Alert[]>([
-    { id: 1, type: 'critical', message: 'Superspreader node detected — high centrality score', timestamp: new Date().toISOString() },
-    { id: 2, type: 'warning',  message: 'Bot cluster Campaign_A activity spike',              timestamp: new Date(Date.now() - 60000).toISOString() },
-    { id: 3, type: 'info',     message: 'Graph topology updated — 50 nodes active',           timestamp: new Date(Date.now() - 120000).toISOString() },
+    { id: 1, type: 'critical', message: 'Super-spreader node isolated — BC score exceeds critical threshold', timestamp: new Date().toISOString() },
+    { id: 2, type: 'warning',  message: 'Coordinated bot cluster Campaign_A exhibiting velocity anomaly',    timestamp: new Date(Date.now() - 60000).toISOString() },
+    { id: 3, type: 'info',     message: 'Graph topology recomputed — 50 active nodes synchronized',         timestamp: new Date(Date.now() - 120000).toISOString() },
   ])
 
   useEffect(() => {
@@ -54,10 +54,12 @@ export function AlertsPanel() {
     }, 800)
 
     const msgs = [
-      'Anomalous propagation velocity detected',
-      'New coordinated cluster forming',
-      'Containment recommendation: Node #1',
-      'Misinformation confidence > 90%',
+      'Anomalous propagation velocity exceeds baseline by 3.2σ',
+      'New coordinated inauthentic cluster forming — 7 nodes',
+      'Containment protocol recommended for Node #1 — PR score critical',
+      'Threat signature match: high-confidence source identified',
+      'Graph edge pruning simulation complete — reach reduced 41%',
+      'Exfiltration path detected — 2-hop relay through bot network',
     ]
     const interval = setInterval(() => {
       const newAlert: Alert = {

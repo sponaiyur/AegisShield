@@ -15,11 +15,11 @@ export function DetectionPage() {
             <Shield className="h-5 w-5 text-primary" />
           </div>
           <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
-            Content Detection
+            Content Analysis
           </h1>
         </div>
         <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-          Classify text or images to detect misinformation. Run full analysis to generate propagation graphs.
+          Classify text or images to trace the source and spread of misinformation. Run full analysis to generate propagation graphs.
         </p>
       </div>
 
