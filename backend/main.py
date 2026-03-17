@@ -1,14 +1,15 @@
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import shutil
 import uuid
 import os
+from datetime import datetime, timezone
 
 # NLP + OCR
 from backend.nlp.classifier import predict
-from backend.ocr.ocr_module import extract_text
+from backend.ocr.ocr_module import extract_text  # TODO: Re-enable after easyocr is installed
 
 # Graph engine
 from backend.graph.engine import (
@@ -41,6 +42,16 @@ class ClassifyRequest(BaseModel):
 class AnalyzeRequest(BaseModel):
     text: Optional[str] = None
     use_cached_graph: bool = True
+    propagation_metadata: Optional[dict] = None
+
+
+class AuditLogEntry(BaseModel):
+    timestamp: str
+    signature_id: str
+    regulatory_order_id: str
+    action: str
+    status: str  # FLAGGED, COMPLIANT, or system
+    compliance_ref: str
 
 
 class PropagationTimelineRequest(BaseModel):
@@ -55,6 +66,9 @@ STATIC_NLP = {
     "true_probability": 0.09,
     "confidence": "high"
 }
+
+# -------- In-Memory Audit Log --------
+audit_log_store: List[dict] = []
 
 
 # -------- Health Check --------
@@ -74,20 +88,15 @@ async def classify_endpoint(req: ClassifyRequest):
     return result
 
 
-# -------- OCR Endpoint --------
 
+# -------- OCR Endpoint --------
 @app.post("/extract-text")
 async def extract_text_endpoint(file: UploadFile):
-
     temp_path = f"temp_{uuid.uuid4()}.png"
-
     with open(temp_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-
     extracted = extract_text(temp_path)
-
     os.remove(temp_path)
-
     return {"extracted_text": extracted}
 
 
@@ -95,16 +104,47 @@ async def extract_text_endpoint(file: UploadFile):
 
 @app.post("/analyze")
 async def analyze(req: AnalyzeRequest):
-
+    """Composite threat analysis combining NLP and propagation signals."""
+    
+    # Get NLP classification
     if req.text:
         nlp_result = predict(req.text)
     else:
         nlp_result = STATIC_NLP
-
+    
+    # Extract NLP confidence score (fake_probability)
+    nlp_score = round(nlp_result.get("fake_probability", 0.5), 4)
+    
+    # Get propagation score (stub at 0.5 for now, will use real classifier after Phase 2)
+    if req.propagation_metadata:
+        # TODO: Call PropagationClassifier.predict(req.propagation_metadata) here
+        # For now, stub at 0.5
+        prop_score = 0.5
+    else:
+        prop_score = 0.5
+    prop_score = round(prop_score, 4)
+    
+    # Compute composite threat: 35% NLP + 65% Propagation
+    composite_threat = round(0.35 * nlp_score + 0.65 * prop_score, 4)
+    
+    # Generate verdict
+    verdict = "COORDINATED" if composite_threat > 0.6 else "ORGANIC"
+    
+    # Generate unique IDs
+    regulatory_order_id = f"REG-2026-{uuid.uuid4().hex[:6].upper()}"
+    signature_id = f"SIG-{uuid.uuid4().hex[:8].upper()}"
+    
+    # Get graph data
     graph_data = serialize_graph(G, SUPERSPREADER_ID)
-
+    
     return {
-        "nlp": nlp_result,
+        "nlp_score": nlp_score,
+        "prop_score": prop_score,
+        "composite_threat": composite_threat,
+        "verdict": verdict,
+        "regulatory_order_id": regulatory_order_id,
+        "signature_id": signature_id,
+        "nlp_details": nlp_result,
         "graph": graph_data
     }
 
@@ -135,8 +175,38 @@ async def get_graph():
 
 @app.post("/contain/{node_id}")
 async def contain(node_id: int):
-
-    return simulate_containment(G, node_id)
+    """Apply surgical containment and log compliance actions"""
+    result = simulate_containment(G, node_id)
+    
+    # Generate unique IDs for this containment action
+    regulatory_order_id = f"REG-2026-{uuid.uuid4().hex[:6].upper()}"
+    signature_id = f"SIG-{uuid.uuid4().hex[:8].upper()}"
+    timestamp = datetime.now(timezone.utc).isoformat()
+    
+    # Entry 1: Coordination Detection
+    entry_1 = {
+        "timestamp": timestamp,
+        "signature_id": signature_id,
+        "regulatory_order_id": regulatory_order_id,
+        "action": "Inorganic Coordination Signature detected",
+        "status": "FLAGGED",
+        "compliance_ref": "DSA Art.17 / IT Rules 2026 §14(3)"
+    }
+    audit_log_store.append(entry_1)
+    
+    # Entry 2: Containment Applied
+    cut_edge_count = len(result.get("cut_edges", []))
+    entry_2 = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "signature_id": signature_id,
+        "regulatory_order_id": regulatory_order_id,
+        "action": f"Bridge edges severed · {cut_edge_count} edges cut",
+        "status": "COMPLIANT",
+        "compliance_ref": "DSA Art.17 / IT Rules 2026 §14(3)"
+    }
+    audit_log_store.append(entry_2)
+    
+    return result
 
 
 # -------- Threat Scores --------
@@ -197,7 +267,14 @@ async def cluster_info():
 # -------- Audit Log --------
 
 @app.get("/audit-log")
-async def audit_log():
+async def get_audit_log():
+    """Retrieve audit log, sorted newest-first (most recent at index 0)"""
+    sorted_log = sorted(
+        audit_log_store,
+        key=lambda x: x["timestamp"],
+        reverse=True
+    )
+    return {"log": sorted_log}
 
     return {
         "log": [
@@ -230,3 +307,10 @@ async def training_stats():
         samples['coordinated'].append(extract_features(coord_timeline))
     
     return samples
+
+@app.post("/audit-log", status_code=201)
+async def post_audit_log(entry: AuditLogEntry):
+    """Append a new entry to the audit log"""
+    log_entry = entry.dict()
+    audit_log_store.append(log_entry)
+    return {"status": "logged", "entry": log_entry}
