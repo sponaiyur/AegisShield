@@ -261,8 +261,7 @@ def extract_features(timeline: list, infection_prob: float = 0.25) -> dict:
     counts = sorted(step_counts.values())
     n = len(counts)
     if n > 1:
-        cumulative = np.cumsum(counts)
-        gini = (2 * np.sum((i + 1) * counts[i] for i in range(n)) 
+        gini = (2 * sum((i + 1) * counts[i] for i in range(n)) 
                 / (n * np.sum(counts)) - (n + 1) / n)
         gini = round(float(abs(gini)), 4)
     else:

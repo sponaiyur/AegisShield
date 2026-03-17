@@ -20,6 +20,12 @@ export function PropagationGraph() {
   useEffect(() => {
     if (!data || !containerRef.current) return
 
+    if (cyRef.current && !cyRef.current.destroyed()) {
+      cyRef.current.stop()
+      cyRef.current.removeAllListeners()
+      cyRef.current.destroy()
+    }
+
     const cy = Cytoscape({
       container: containerRef.current,
       elements: [
@@ -91,18 +97,21 @@ export function PropagationGraph() {
           style: { 'border-color': '#06b6d4', 'border-width': 4 },
         },
       ],
-      layout: {
-        name: 'cose',
-        animate: true,
-        animationDuration: 800,
-        randomize: true,
-        nodeRepulsion: 6000,
-        idealEdgeLength: 60,
-        nodeSpacing: 10,
-        fit: true,
-        padding: 20,
-      } as any,
+      layout: { name: 'preset' } as any,
     })
+
+    const layout = cy.layout({
+      name: 'cose',
+      animate: true,
+      animationDuration: 800,
+      randomize: true,
+      nodeRepulsion: 6000,
+      idealEdgeLength: 60,
+      nodeSpacing: 10,
+      fit: true,
+      padding: 20,
+    } as any)
+    layout.run()
 
     cy.on('tap', 'node', (e) => {
       const n = e.target.data()
@@ -117,7 +126,17 @@ export function PropagationGraph() {
       cy.$(`#${id}`).addClass('contained')
     })
 
-    return () => { cy.destroy() }
+    return () => {
+      layout.stop()
+      cy.stop()
+      cy.removeAllListeners()
+      if (!cy.destroyed()) {
+        cy.destroy()
+      }
+      if (cyRef.current === cy) {
+        cyRef.current = null
+      }
+    }
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Whenever the 'contained-nodes' cache updates, apply the class to existing cy instance
@@ -130,7 +149,7 @@ export function PropagationGraph() {
       ) {
         const ids = qc.getQueryData<number[]>(['contained-nodes']) ?? []
         const cy = cyRef.current
-        if (!cy) return
+        if (!cy || cy.destroyed()) return
         ids.forEach((id) => {
           cy.$(`#${id}`).addClass('contained')
         })
