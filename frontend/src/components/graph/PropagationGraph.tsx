@@ -11,20 +11,34 @@ import type { GraphNode } from '@/types'
 export function PropagationGraph() {
   const containerRef = useRef<HTMLDivElement>(null)
   const cyRef = useRef<Cytoscape.Core | null>(null)
+  const layoutRef = useRef<any>(null)
   const { data, isLoading, error } = useGraph()
   const contain = useContain()
   const qc = useQueryClient()
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
 
+  const destroyCy = () => {
+    const cy = cyRef.current
+    cyRef.current = null
+
+    if (layoutRef.current) {
+      layoutRef.current.stop?.()
+      layoutRef.current = null
+    }
+
+    if (!cy || cy.destroyed()) return
+
+    cy.stop()
+    cy.elements().stop()
+    cy.removeAllListeners()
+    cy.destroy()
+  }
+
   // Build the Cytoscape instance whenever graph data changes
   useEffect(() => {
     if (!data || !containerRef.current) return
 
-    if (cyRef.current && !cyRef.current.destroyed()) {
-      cyRef.current.stop()
-      cyRef.current.removeAllListeners()
-      cyRef.current.destroy()
-    }
+    destroyCy()
 
     const cy = Cytoscape({
       container: containerRef.current,
@@ -102,8 +116,8 @@ export function PropagationGraph() {
 
     const layout = cy.layout({
       name: 'cose',
-      animate: true,
-      animationDuration: 800,
+      animate: false,
+      animationDuration: 0,
       randomize: true,
       nodeRepulsion: 6000,
       idealEdgeLength: 60,
@@ -111,6 +125,7 @@ export function PropagationGraph() {
       fit: true,
       padding: 20,
     } as any)
+    layoutRef.current = layout
     layout.run()
 
     cy.on('tap', 'node', (e) => {
@@ -127,17 +142,21 @@ export function PropagationGraph() {
     })
 
     return () => {
-      layout.stop()
-      cy.stop()
-      cy.removeAllListeners()
-      if (!cy.destroyed()) {
-        cy.destroy()
+      if (layoutRef.current === layout) {
+        layoutRef.current = null
       }
       if (cyRef.current === cy) {
-        cyRef.current = null
+        destroyCy()
       }
     }
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ensure cleanup on component unmount even if the data effect is skipped.
+  useEffect(() => {
+    return () => {
+      destroyCy()
+    }
+  }, [])
 
   // Whenever the 'contained-nodes' cache updates, apply the class to existing cy instance
   useEffect(() => {
@@ -151,6 +170,7 @@ export function PropagationGraph() {
         const cy = cyRef.current
         if (!cy || cy.destroyed()) return
         ids.forEach((id) => {
+          if (cy.destroyed()) return
           cy.$(`#${id}`).addClass('contained')
         })
       }
