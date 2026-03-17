@@ -137,13 +137,27 @@ function TiltCard({ children, className }: { children: ReactNode; className?: st
 export function HomePage() {
   const { displayed: typedWord, done: typingDone } = useTypewriter('Misinformation', 72, 650)
   const { ref: statsRef, isVisible: statsVisible } = useIntersection()
+  const [spotlight, setSpotlight] = useState({ x: 50, y: 34, active: false })
+
+  const handleHeroMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const finePointer = window.matchMedia('(pointer:fine)').matches
+    if (!finePointer || window.innerWidth < 1024) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setSpotlight({ x, y, active: true })
+  }, [])
+
+  const handleHeroLeave = useCallback(() => {
+    setSpotlight((prev) => ({ ...prev, active: false }))
+  }, [])
 
   return (
-    <PageBackground image="/home.jpg" tone="primary">
+    <PageBackground image="/home.jpg" tone="primary" imageMode="contain" imageFixed animateImage={false}>
       <div className="page-content">
 
       {/* ── Hero ──────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
+      <section className="section-mask-bottom relative overflow-hidden" onMouseMove={handleHeroMove} onMouseLeave={handleHeroLeave}>
         {/* Hex grid overlay */}
         <div
           className="absolute inset-0 bg-hex-grid opacity-[0.03]"
@@ -159,6 +173,14 @@ export function HomePage() {
         />
         <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 h-[700px] w-[900px] rounded-full bg-primary/12 blur-[140px]" />
         <div className="pointer-events-none absolute -bottom-20 left-1/4 h-[400px] w-[500px] rounded-full bg-info/8 blur-[120px]" />
+        <div
+          className="pointer-events-none absolute inset-0 hidden lg:block"
+          style={{
+            opacity: spotlight.active ? 0.95 : 0,
+            transition: 'opacity 220ms ease',
+            background: `radial-gradient(340px circle at ${spotlight.x}% ${spotlight.y}%, hsl(var(--primary) / 0.2) 0%, hsl(var(--info) / 0.12) 28%, transparent 72%)`,
+          }}
+        />
         {/* Floating accent orbs */}
         <div className="pointer-events-none absolute right-[10%] top-[20%] h-2 w-2 rounded-full bg-primary/40"
           style={{ animation: 'particle-drift 6s ease-in-out infinite' }} />
@@ -182,7 +204,7 @@ export function HomePage() {
             </div>
 
             {/* Heading — typed word is forced to its own line */}
-            <h1 className="font-display mb-6 text-5xl font-bold leading-[1.15] tracking-tight text-foreground md:text-7xl">
+            <h1 className="font-display mb-6 text-[clamp(2.2rem,6vw,4.7rem)] font-bold leading-[1.04] tracking-[-0.02em] text-foreground">
               Track &amp; Contain
               <br />
               <span className="text-gradient">
@@ -195,7 +217,7 @@ export function HomePage() {
               <span className="text-foreground/80">at Scale</span>
             </h1>
 
-            <p className="mx-auto mb-10 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+            <p className="mx-auto mb-10 max-w-2xl text-[clamp(0.95rem,1.6vw,1.15rem)] leading-relaxed text-muted-foreground">
               AI-powered propagation analysis, real-time threat scoring, and surgical
               containment — built for information integrity.
             </p>
@@ -203,14 +225,14 @@ export function HomePage() {
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 to="/detection"
-                className="group flex items-center gap-2.5 rounded-xl bg-primary px-8 py-3.5 font-mono text-sm font-semibold text-primary-foreground shadow-xl shadow-primary/25 transition-all duration-200 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-[0.97]"
+                className="focus-glow interactive-cta group flex items-center gap-2.5 rounded-xl bg-primary px-8 py-3.5 font-mono text-sm font-semibold text-primary-foreground shadow-xl shadow-primary/25 transition-all duration-200 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-[0.97]"
               >
                 Start Analyzing
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 to="/analytics"
-                className="flex items-center gap-2.5 rounded-xl border border-border bg-secondary/60 px-8 py-3.5 font-mono text-sm font-semibold text-secondary-foreground transition-all duration-200 hover:border-primary/30 hover:bg-secondary active:scale-[0.97]"
+                className="focus-glow interactive-cta flex items-center gap-2.5 rounded-xl border border-border bg-secondary/60 px-8 py-3.5 font-mono text-sm font-semibold text-secondary-foreground transition-all duration-200 hover:border-primary/30 hover:bg-secondary active:scale-[0.97]"
               >
                 <Network className="h-4 w-4" />
                 View Network
@@ -229,10 +251,12 @@ export function HomePage() {
         </div>
       </section>
 
+      <div className="section-divider" />
+
       {/* ── Stats ─────────────────────────────────────────────────── */}
       <div
         ref={statsRef as RefObject<HTMLDivElement>}
-        className="border-y border-border bg-card/40"
+        className="section-mask-top section-mask-bottom border-y border-border bg-card/40"
       >
         <div className="mx-auto grid max-w-7xl grid-cols-2 md:grid-cols-4">
           {rawStats.map((stat, i) => (
@@ -266,10 +290,10 @@ export function HomePage() {
       </div>
 
       {/* ── Features ──────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-6 py-24 md:py-32">
+      <section className="section-mask-top mx-auto max-w-7xl px-6 py-20 md:py-28">
         <RevealOnScroll className="mb-16 text-center">
           <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-widest text-primary">Capabilities</p>
-          <h2 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">Platform Overview</h2>
+          <h2 className="font-display text-[clamp(1.9rem,3.6vw,2.7rem)] font-bold tracking-[-0.015em] text-foreground">Platform Overview</h2>
           <p className="mx-auto mt-4 max-w-lg text-sm text-muted-foreground">
             End-to-end misinformation defense from source tracking through containment.
           </p>
@@ -279,7 +303,7 @@ export function HomePage() {
           {features.map((f, i) => (
             <RevealOnScroll key={f.title} delay={i * 90}>
               <TiltCard>
-                <Link to={f.link} className="card-glass-hover group relative overflow-hidden rounded-2xl p-7 block">
+                <Link to={f.link} className="focus-glow interactive-card card-glass-hover group relative block overflow-hidden rounded-2xl p-7">
                   <span className="pointer-events-none absolute right-5 top-4 font-display text-7xl font-bold text-foreground/[0.03] select-none">
                     {f.num}
                   </span>
@@ -300,12 +324,14 @@ export function HomePage() {
         </div>
       </section>
 
+      <div className="section-divider" />
+
       {/* ── Live Operations Strip ─────────────────────────────────── */}
-      <section className="border-y border-border bg-gradient-to-b from-background/20 to-card/25 px-6 py-20 md:py-24">
+      <section className="section-mask-top section-mask-bottom border-y border-border bg-gradient-to-b from-background/20 to-card/25 px-6 py-18 md:py-22">
         <div className="mx-auto max-w-7xl">
           <RevealOnScroll className="mb-10 text-center">
             <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-widest text-info">Realtime Command Surface</p>
-            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">Live Operations Pulse</h2>
+            <h2 className="font-display text-[clamp(1.9rem,3.5vw,2.7rem)] font-bold tracking-[-0.015em] text-foreground">Live Operations Pulse</h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-muted-foreground">
               Persistent telemetry cards show trust movement, network pressure, and containment performance as incidents unfold.
             </p>
@@ -314,7 +340,7 @@ export function HomePage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {liveSignals.map((signal, i) => (
               <RevealOnScroll key={signal.title} delay={i * 90} direction={i % 2 ? 'right' : 'up'} distance={20}>
-                <div className={`relative overflow-hidden rounded-2xl border border-border bg-card/70 p-6 shadow-2xl ${signal.glow}`}>
+                <div className={`interactive-card relative overflow-hidden rounded-2xl border border-border bg-card/70 p-6 shadow-2xl ${signal.glow}`}>
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-info/5" />
                   <div className="relative">
                     <div className="mb-5 flex items-center gap-3">
@@ -340,12 +366,14 @@ export function HomePage() {
         </div>
       </section>
 
+      <div className="section-divider" />
+
       {/* ── How It Works ──────────────────────────────────────────── */}
-      <section className="border-t border-border bg-gradient-to-b from-card/30 to-transparent px-6 py-24 md:py-32">
+      <section className="section-mask-top section-mask-bottom border-t border-border bg-gradient-to-b from-card/30 to-transparent px-6 py-20 md:py-28">
         <div className="mx-auto max-w-7xl">
           <RevealOnScroll className="mb-16 text-center">
             <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-widest text-primary">Workflow</p>
-            <h2 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">How It Works</h2>
+            <h2 className="font-display text-[clamp(1.9rem,3.4vw,2.7rem)] font-bold tracking-[-0.015em] text-foreground">How It Works</h2>
             <p className="mx-auto mt-4 max-w-lg text-sm text-muted-foreground">
               From content ingestion to surgical containment in seconds.
             </p>
@@ -354,7 +382,7 @@ export function HomePage() {
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
             {steps.map((s, i) => (
               <RevealOnScroll key={s.step} delay={i * 100}>
-                <div className="card-glass rounded-2xl p-7">
+                <div className="interactive-card card-glass rounded-2xl p-7">
                   <div className="mb-5 flex items-center gap-3">
                     <span className={`rounded-lg border border-current/25 px-2 py-1 font-mono text-xs font-bold ${s.accent}`}>
                       {s.step}
@@ -372,8 +400,10 @@ export function HomePage() {
         </div>
       </section>
 
+      <div className="section-divider" />
+
       {/* ── CTA ───────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-6 py-24">
+      <section className="section-mask-top mx-auto max-w-7xl px-6 py-20 md:py-24">
         <RevealOnScroll>
           <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card via-card to-card/50 p-12 text-center md:p-20">
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/6 via-transparent to-info/4" />
@@ -396,7 +426,7 @@ export function HomePage() {
               </p>
               <Link
                 to="/detection"
-                className="group inline-flex items-center gap-2.5 rounded-xl bg-primary px-9 py-4 font-mono text-sm font-semibold text-primary-foreground shadow-2xl shadow-primary/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-primary/50 active:scale-[0.97]"
+                className="focus-glow interactive-cta group inline-flex items-center gap-2.5 rounded-xl bg-primary px-9 py-4 font-mono text-sm font-semibold text-primary-foreground shadow-2xl shadow-primary/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-primary/50 active:scale-[0.97]"
               >
                 Launch Platform
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

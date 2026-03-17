@@ -5,6 +5,9 @@ type PageTone = 'primary' | 'info' | 'safe' | 'threat'
 type PageBackgroundProps = {
   image: string
   tone?: PageTone
+  imageMode?: 'cover' | 'contain'
+  imageFixed?: boolean
+  animateImage?: boolean
   children: ReactNode
 }
 
@@ -15,11 +18,25 @@ const toneClass: Record<PageTone, string> = {
   threat: 'page-scene-overlay-threat',
 }
 
-export function PageBackground({ image, tone = 'primary', children }: PageBackgroundProps) {
+export function PageBackground({
+  image,
+  tone = 'primary',
+  imageMode = 'cover',
+  imageFixed = false,
+  animateImage = true,
+  children,
+}: PageBackgroundProps) {
+  const imageClasses = [
+    'page-scene-image',
+    imageMode === 'contain' ? 'page-scene-image-contain' : '',
+    imageFixed ? 'page-scene-image-fixed' : '',
+    animateImage ? 'animate-bg-drift' : '',
+  ].join(' ').trim()
+
   return (
     <div className="page-scene">
       <div className="page-scene-media" aria-hidden>
-        <div className="page-scene-image animate-bg-drift" style={{ backgroundImage: `url(${image})` }} />
+        <div className={imageClasses} style={{ backgroundImage: `url(${image})` }} />
         <div className={`page-scene-overlay ${toneClass[tone]}`} />
         <div className="page-scene-grid" />
       </div>
